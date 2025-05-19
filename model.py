@@ -6,6 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
 import chromedriver_autoinstaller
 
 import pandas as pd
@@ -17,9 +18,18 @@ def scrape_openwork(email: str, password: str, base_url: str, headless: bool = T
     DataFrameで返す。
     """
     # --- Selenium 動作設定 ---
-    options = webdriver.ChromeOptions()
+    # options = webdriver.ChromeOptions()
+    options = Options()
     options.binary_location = os.environ.get("CHROMIUM_PATH", "/usr/bin/chromium")
-    chromedriver_autoinstaller.install()
+
+    # 1) 書き込み可能なディレクトリを作成
+    install_dir = os.path.join(os.getcwd(), "chromedriver_bin")
+    os.makedirs(install_dir, exist_ok=True)
+
+    # 2) そのディレクトリにドライバをインストール
+    #    戻り値はインストールされた chromedriver の絶対パス
+    chromedriver_path = chromedriver_autoinstaller.install(path=install_dir)
+
 
     if headless:
         options.add_argument('--headless')
@@ -35,7 +45,12 @@ def scrape_openwork(email: str, password: str, base_url: str, headless: bool = T
     #     service=ChromeService(ChromeDriverManager().install()),
     #     options=options
     # )
-    driver = webdriver.Chrome(service=Service(), options=options)
+
+    # 3) Service にフルパスを渡して起動
+    service = Service(executable_path=chromedriver_path)
+    driver = webdriver.Chrome(service=service, options=options)
+
+    # driver = webdriver.Chrome(service=Service(), options=options)
 
     wait = WebDriverWait(driver, 10)
     results = []

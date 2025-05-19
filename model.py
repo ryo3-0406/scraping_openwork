@@ -11,6 +11,8 @@ import chromedriver_autoinstaller
 
 import pandas as pd
 import os
+import tempfile
+import streamlit as st
 
 def scrape_openwork(email: str, password: str, base_url: str, headless: bool = True) -> pd.DataFrame:
     """
@@ -38,16 +40,10 @@ def scrape_openwork(email: str, password: str, base_url: str, headless: bool = T
     # （オプションでデバッグ用にリモートポートを開く）
     options.add_argument('--remote-debugging-port=9222')
 
-
-    # driver = webdriver.Chrome(
-    #     service=ChromeService(ChromeDriverManager().install()),
-    #     options=options
-    # )
-
-    # 3) Service にフルパスを渡して起動
-
     chromedriver_path = "/usr/bin/chromedriver"
-    service = Service(executable_path=chromedriver_path)
+
+    log_file = os.path.join(tempfile.gettempdir(), "chromedriver.log")
+    service = Service(executable_path=chromedriver_path, log_path=log_file)
     driver = webdriver.Chrome(service=service, options=options)
 
     wait = WebDriverWait(driver, 10)
@@ -87,5 +83,7 @@ def scrape_openwork(email: str, password: str, base_url: str, headless: bool = T
 
     finally:
         driver.quit()
+        with open(log_file, encoding="utf-8", errors="ignore") as f:
+            st.text("=== chromedriver.log ===\n" + f.read())
 
     return pd.DataFrame(results)

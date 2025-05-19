@@ -6,6 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from webdriver_manager.chrome import ChromeDriverManager
 import pandas as pd
+import os
 
 def scrape_openwork(email: str, password: str, base_url: str, headless: bool = True) -> pd.DataFrame:
     """
@@ -19,6 +20,7 @@ def scrape_openwork(email: str, password: str, base_url: str, headless: bool = T
     options.add_argument('--disable-gpu')
     options.add_argument('--window-size=1920,1080')
     options.add_argument('--lang=ja-JP')
+    options.binary_location = os.environ.get('CHROME_BIN','/usr/bin/chromium-browser')
 
     driver = webdriver.Chrome(
         service=ChromeService(ChromeDriverManager().install()),

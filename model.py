@@ -1,0 +1,65 @@
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
+from webdriver_manager.chrome import ChromeDriverManager
+import pandas as pd
+
+def scrape_openwork(email: str, password: str, base_url: str, headless: bool = True) -> pd.DataFrame:
+    """
+    OpenWork の口コミページをログイン→全ページスクレイプし、
+    DataFrameで返す。
+    """
+    # --- Selenium 動作設定 ---
+    options = webdriver.ChromeOptions()
+    if headless:
+        options.add_argument('--headless')
+    options.add_argument('--disable-gpu')
+    options.add_argument('--window-size=1920,1080')
+    options.add_argument('--lang=ja-JP')
+
+    driver = webdriver.Chrome(
+        service=ChromeService(ChromeDriverManager().install()),
+        options=options
+    )
+    wait = WebDriverWait(driver, 10)
+    results = []
+
+    try:
+        # ログイン
+        driver.get('https://www.openwork.jp/login.php')
+        email_in = wait.until(EC.presence_of_element_located((By.ID, '_username')))
+        email_in.clear(); email_in.send_keys(email)
+        pw_in = driver.find_element(By.ID, '_password')
+        pw_in.clear(); pw_in.send_keys(password)
+        driver.find_element(By.ID, 'log_in').click()
+        wait.until(EC.invisibility_of_element_located((By.NAME, 'login')))
+
+        # ページめくりスクレイプ
+        page = 1
+        while True:
+            url = f"{base_url}&next_page={page}" if page > 1 else base_url
+            driver.get(url)
+            try:
+                wait.until(EC.presence_of_all_elements_located(
+                    (By.CSS_SELECTOR, 'article.article, article.article-first')
+                ))
+            except TimeoutException:
+                break
+
+            for art in driver.find_elements(By.CSS_SELECTOR, 'article.article, article.article-first'):
+                cat = art.find_element(By.CSS_SELECTOR, 'h3 a[title]').text.strip()
+                com = art.find_element(By.CSS_SELECTOR, 'dd.article_answer').text.strip()
+                results.append({'category': cat, 'comment': com})
+
+            # 次ページリンクがなければ終了
+            if not driver.find_elements(By.CSS_SELECTOR, 'a.paging_link-more'):
+                break
+            page += 1
+
+    finally:
+        driver.quit()
+
+    return pd.DataFrame(results)

@@ -5,6 +5,9 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.service import Service
+import chromedriver_autoinstaller
+
 import pandas as pd
 import os
 
@@ -16,6 +19,8 @@ def scrape_openwork(email: str, password: str, base_url: str, headless: bool = T
     # --- Selenium 動作設定 ---
     options = webdriver.ChromeOptions()
     options.binary_location = os.environ.get("CHROMIUM_PATH", "/usr/bin/chromium")
+    chromedriver_autoinstaller.install()
+
     if headless:
         options.add_argument('--headless')
 
@@ -26,10 +31,12 @@ def scrape_openwork(email: str, password: str, base_url: str, headless: bool = T
     options.add_argument('--window-size=1920,1080')
     options.add_argument('--lang=ja-JP')
 
-    driver = webdriver.Chrome(
-        service=ChromeService(ChromeDriverManager().install()),
-        options=options
-    )
+    # driver = webdriver.Chrome(
+    #     service=ChromeService(ChromeDriverManager().install()),
+    #     options=options
+    # )
+    driver = webdriver.Chrome(service=Service(), options=options)
+
     wait = WebDriverWait(driver, 10)
     results = []
 

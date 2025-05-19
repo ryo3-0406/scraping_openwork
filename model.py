@@ -19,6 +19,10 @@ def scrape_openwork(email: str, password: str, base_url: str, headless: bool = T
     OpenWork の口コミページをログイン→全ページスクレイプし、
     DataFrameで返す。
     """
+    log_file = os.path.join(tempfile.gettempdir(), "chromedriver.log")
+    # 【１】事前に空ファイルを作っておく
+    open(log_file, "w").close()
+
     # --- Selenium 動作設定 ---
     options = webdriver.ChromeOptions()
     # options = Options()
@@ -43,7 +47,13 @@ def scrape_openwork(email: str, password: str, base_url: str, headless: bool = T
     chromedriver_path = "/usr/bin/chromedriver"
 
     log_file = os.path.join(tempfile.gettempdir(), "chromedriver.log")
-    service = Service(executable_path=chromedriver_path, log_path=log_file)
+
+    service = Service(
+        executable_path=chromedriver_path,
+        log_path=log_file,
+        service_args=["--verbose"]        # 追加
+    )
+
     driver = webdriver.Chrome(service=service, options=options)
 
     wait = WebDriverWait(driver, 10)
@@ -83,7 +93,13 @@ def scrape_openwork(email: str, password: str, base_url: str, headless: bool = T
 
     finally:
         driver.quit()
-        with open(log_file, encoding="utf-8", errors="ignore") as f:
-            st.text("=== chromedriver.log ===\n" + f.read())
+        # 【３】ファイルがあるかチェックしてから中身を Streamlit に出力
+        if os.path.exists(log_file):
+            with open(log_file, encoding="utf-8", errors="ignore") as f:
+                log_text = f.read()
+            # 長くなるので st.code か st.text_area で表示
+            st.code(log_text, language="text")
+        else:
+            st.error(f"chromedriver.log が見つかりません: {log_file}")
 
     return pd.DataFrame(results)

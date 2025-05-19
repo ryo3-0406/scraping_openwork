@@ -20,15 +20,11 @@ def scrape_openwork(email: str, password: str, base_url: str, headless: bool = T
     # --- Selenium 動作設定 ---
     options = webdriver.ChromeOptions()
     # options = Options()
-    options.binary_location = os.environ.get("CHROMIUM_PATH", "/usr/bin/chromium-browser")
+    options.binary_location = os.environ.get("CHROMIUM_PATH", "/usr/bin/chromium")
 
     # 1) 書き込み可能なディレクトリを作成
     install_dir = os.path.join(os.getcwd(), "chromedriver_bin")
     os.makedirs(install_dir, exist_ok=True)
-
-    # 2) そのディレクトリにドライバをインストール
-    #    戻り値はインストールされた chromedriver の絶対パス
-    chromedriver_path = chromedriver_autoinstaller.install(path=install_dir)
 
     if headless:
         options.add_argument('--headless=new')
@@ -42,12 +38,15 @@ def scrape_openwork(email: str, password: str, base_url: str, headless: bool = T
     # （オプションでデバッグ用にリモートポートを開く）
     options.add_argument('--remote-debugging-port=9222')
 
+
     # driver = webdriver.Chrome(
     #     service=ChromeService(ChromeDriverManager().install()),
     #     options=options
     # )
 
     # 3) Service にフルパスを渡して起動
+
+    chromedriver_path = "/usr/bin/chromedriver"
     service = Service(executable_path=chromedriver_path)
     driver = webdriver.Chrome(service=service, options=options)
 

@@ -15,6 +15,7 @@ def scrape_openwork(email: str, password: str, base_url: str, headless: bool = T
     """
     # --- Selenium 動作設定 ---
     options = webdriver.ChromeOptions()
+    options.binary_location = os.environ.get("CHROMIUM_PATH", "/usr/bin/chromium")
     if headless:
         options.add_argument('--headless')
 

@@ -15,19 +15,13 @@ def scrape_openwork(email: str, password: str, base_url: str, headless: bool = T
     """
     # --- Selenium 動作設定 ---
     options = webdriver.ChromeOptions()
-    # if headless:
-    #     options.add_argument('--headless')
-
     if headless:
-    # Chromium 109+ の新しいヘッドレスモード
-        options.add_argument('--headless=new')
+        options.add_argument('--headless')
+
     # root や CI 環境向け安定化オプション
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
     options.add_argument('--disable-gpu')
-    # DevToolsActivePort を確実に作らせる
-    options.add_argument('--remote-debugging-port=9222')
-
     options.add_argument('--window-size=1920,1080')
     options.add_argument('--lang=ja-JP')
 

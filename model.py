@@ -18,8 +18,8 @@ def scrape_openwork(email: str, password: str, base_url: str, headless: bool = T
     DataFrameで返す。
     """
     # --- Selenium 動作設定 ---
-    # options = webdriver.ChromeOptions()
-    options = Options()
+    options = webdriver.ChromeOptions()
+    # options = Options()
     options.binary_location = os.environ.get("CHROMIUM_PATH", "/usr/bin/chromium")
 
     # 1) 書き込み可能なディレクトリを作成
@@ -30,15 +30,14 @@ def scrape_openwork(email: str, password: str, base_url: str, headless: bool = T
     #    戻り値はインストールされた chromedriver の絶対パス
     chromedriver_path = chromedriver_autoinstaller.install(path=install_dir)
 
-
     if headless:
         options.add_argument('--headless')
 
     # root や CI 環境向け安定化オプション
     options.add_argument('--no-sandbox')
-    # options.add_argument('--disable-dev-shm-usage')
-    # options.add_argument('--disable-gpu')
-    # options.add_argument('--window-size=1920,1080')
+    options.add_argument('--disable-dev-shm-usage')
+    options.add_argument('--disable-gpu')
+    options.add_argument('--window-size=1920,1080')
     options.add_argument('--lang=ja-JP')
 
     # driver = webdriver.Chrome(
@@ -49,8 +48,6 @@ def scrape_openwork(email: str, password: str, base_url: str, headless: bool = T
     # 3) Service にフルパスを渡して起動
     service = Service(executable_path=chromedriver_path)
     driver = webdriver.Chrome(service=service, options=options)
-
-    # driver = webdriver.Chrome(service=Service(), options=options)
 
     wait = WebDriverWait(driver, 10)
     results = []

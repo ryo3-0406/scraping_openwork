@@ -1,4 +1,4 @@
-chromium
+chromium-browser
 chromium-driver
 libnss3
 fonts-liberation

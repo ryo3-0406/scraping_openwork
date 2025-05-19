@@ -18,7 +18,7 @@ if st.button("口コミを取得してExcelダウンロード"):
     else:
         with st.spinner("スクレイピング中…しばらくお待ちください"):
             try:
-                df = scrape_openwork(email, password, base_url, headless=True)
+                df = scrape_openwork(email, password, base_url)
             except Exception as e:
                 st.error(f"エラーが発生しました: {e}")
             else:

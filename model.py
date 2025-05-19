@@ -20,7 +20,8 @@ def scrape_openwork(email: str, password: str, base_url: str, headless: bool = T
     options.add_argument('--disable-gpu')
     options.add_argument('--window-size=1920,1080')
     options.add_argument('--lang=ja-JP')
-    options.binary_location = os.environ.get('CHROME_BIN','/usr/bin/chromium-browser')
+
+    options.binary_location = os.environ.get('CHROME_BIN', '/usr/bin/chromium')
 
     driver = webdriver.Chrome(
         service=ChromeService(ChromeDriverManager().install()),
